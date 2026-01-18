@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Matchspel</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0984e3">
+  <link rel="icon" href="icon.png">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <h1>Matchspel</h1>
+
+  <div class="input-section">
+    <input type="text" id="nameInput" placeholder="Skriv ett namn..." />
+    <button id="addNameBtn">Lägg till</button>
+  </div>
+
+  <ul id="nameList"></ul>
+
+  <div class="control-buttons">
+    <button id="generateBtn">Skapa par</button>
+    <button id="clearBtn" class="danger">Rensa alla grupper</button>
+  </div>
+
+  <div class="pairs">
+    <div id="pairsList"></div>
+  </div>
+</body>
+</html>
