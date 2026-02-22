@@ -40,6 +40,55 @@ button {
 button:hover {
     background-color: #333;
 }
+#addNameBtn {
+    width: 42px;         /* Fast bredd */
+    height: 42px;        /* Fast höjd */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;          /* Ta bort padding för att centrera SVG */
+    border-radius: 10px; /* Rundade hörn som på ikonen */
+    background-color: #000;
+    color: #ffd603;
+    transition: all 0.2s ease;
+}
+
+#addNameBtn:hover {
+    background-color: #ffd603;
+    color: #000;
+    transform: scale(1.05); /* En liten effekt när man hovrar */
+}
+
+#addNameBtn svg {
+    width: 24px;
+    height: 24px;
+}
+.control-buttons button, .group h3 button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px; /* Justera efter smak */
+    transition: all 0.2s ease;
+}
+
+/* Speciell styling för runda/kvadratiska ikonknappar */
+#generateSinglesBtn, #generateDoublesBtn, #addNameBtn {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+}
+
+.shuffleBtn, .editBtn {
+    background: transparent;
+    border: 1px solid rgba(255, 214, 3, 0.3);
+    border-radius: 8px;
+    padding: 6px;
+}
+
+.shuffleBtn:hover, .editBtn:hover {
+    background: rgba(255, 214, 3, 0.1);
+    border-color: #ffd603;
+}
 
 ul {
     list-style: none;
@@ -132,4 +181,12 @@ li {
     margin-top: 1rem;
     display: flex;
     gap: 0.5rem;
+}
+
+#clearBtn {
+    margin-bottom: 1rem;
+}
+
+#generateSinglesBtn, #generateDoublesBtn {
+    margin-top: 1rem;
 }

@@ -1,218 +1,257 @@
-
+// --- Referenser ---
 const nameInput = document.getElementById("nameInput");
 const addNameBtn = document.getElementById("addNameBtn");
 const nameList = document.getElementById("nameList");
-const generateBtn = document.getElementById("generateBtn");
+const generateSinglesBtn = document.getElementById("generateSinglesBtn");
+const generateDoublesBtn = document.getElementById("generateDoublesBtn");
 const clearBtn = document.getElementById("clearBtn");
 const pairsList = document.getElementById("pairsList");
 
 let names = [];
 let groupCount = 0;
 
+// --- Namnhantering ---
 addNameBtn.addEventListener("click", () => {
     const name = nameInput.value.trim();
     if (name && !names.includes(name)) {
-    names.push(name);
-    updateNameList();
-    nameInput.value = "";
-    nameInput.focus();
+        names.push(name);
+        updateNameList();
+        nameInput.value = "";
+        nameInput.focus();
     }
 });
 
 function updateNameList() {
     nameList.innerHTML = "";
     names.forEach((n, i) => {
-    const li = document.createElement("li");
-    li.textContent = n;
-    li.title = "Klicka för att ta bort";
-    li.addEventListener("click", () => {
-        names.splice(i, 1);
-        updateNameList();
-    });
-    nameList.appendChild(li);
+        const li = document.createElement("li");
+        li.textContent = n;
+        li.title = "Klicka för att ta bort";
+        li.addEventListener("click", () => {
+            names.splice(i, 1);
+            updateNameList();
+        });
+        nameList.appendChild(li);
     });
 }
 
-generateBtn.addEventListener("click", () => {
-    if (names.length < 2) {
-    alert("Lägg till minst två namn för att skapa par!");
-    return;
-    }
+// --- Skapa Grupper ---
+generateSinglesBtn.addEventListener("click", () => {
+    if (names.length < 2) return alert("Lägg till minst två namn!");
+    createMatchGroup(2);
+});
 
+generateDoublesBtn.addEventListener("click", () => {
+    if (names.length < 2) return alert("Lägg till minst två namn!");
+    createMatchGroup(4);
+});
+
+function createMatchGroup(size) {
     const shuffled = [...names].sort(() => Math.random() - 0.5);
-    const pairs = [];
-
-    for (let i = 0; i < shuffled.length; i += 2) {
-    if (i + 1 < shuffled.length) {
-        pairs.push(`${shuffled[i]} ↔ ${shuffled[i + 1]}`);
-    } else {
-        pairs.push(`${shuffled[i]} (ingen partner)`);
-    }
-    }
+    const matches = generateMatchStrings(shuffled, size);
 
     groupCount++;
-    const groupDiv = createGroupElement(groupCount, pairs);
+    const groupDiv = createGroupElement(groupCount, matches);
     pairsList.appendChild(groupDiv);
 
     names = [];
     updateNameList();
     saveState();
-});
+}
 
+// Hjälpfunktion för att bygga textsträngarna (Nu enbart med ↔)
+function generateMatchStrings(nameArray, size) {
+    const res = [];
+    for (let i = 0; i < nameArray.length; i += size) {
+        if (size === 2) {
+            res.push(nameArray[i + 1] ? `${nameArray[i]} ↔ ${nameArray[i+1]}` : `${nameArray[i]} (ingen partner)`);
+        } else {
+            if (i + 3 < nameArray.length) {
+                res.push(`${nameArray[i]} & ${nameArray[i+1]} ↔ ${nameArray[i+2]} & ${nameArray[i+3]}`);
+            } else if (i + 1 < nameArray.length) {
+                res.push(`${nameArray[i]} & ${nameArray[i+1]} (väntar på motstånd)`);
+            } else {
+                res.push(`${nameArray[i]} (behöver partner)`);
+            }
+        }
+    }
+    return res;
+}
+
+// --- Grupp-elementet ---
 function createGroupElement(number, pairs) {
     const groupDiv = document.createElement("div");
     groupDiv.classList.add("group");
-    groupDiv.dataset.group = number;
 
     const title = document.createElement("h3");
-    title.innerHTML = `Grupp ${number} <button class="editBtn">Redigera</button>`;
+    title.innerHTML = `
+    <button class="shuffleBtn" title="Blanda om gruppen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+    </button> 
+    <span>Grupp ${number}</span> 
+    <button class="editBtn" title="Redigera namn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+    </button>
+`;
     groupDiv.appendChild(title);
 
-    const list = document.createElement("div");
+    const listContainer = document.createElement("div");
+    listContainer.classList.add("list-container");
     pairs.forEach(p => {
-    const div = document.createElement("div");
-    div.classList.add("pair-item");
-    div.textContent = p;
-    list.appendChild(div);
+        const div = document.createElement("div");
+        div.classList.add("pair-item");
+        div.textContent = p;
+        listContainer.appendChild(div);
     });
-    groupDiv.appendChild(list);
+    groupDiv.appendChild(listContainer);
 
-    title.querySelector(".editBtn").addEventListener("click", () => {
-    toggleEditMode(groupDiv, pairs);
-    });
+    // Event Listeners
+    title.querySelector(".shuffleBtn").addEventListener("click", () => shuffleExistingGroup(groupDiv));
+    title.querySelector(".editBtn").addEventListener("click", () => toggleEditMode(groupDiv));
 
     return groupDiv;
 }
 
+// --- Blanda existerande grupp ---
+function shuffleExistingGroup(groupDiv) {
+    const items = [...groupDiv.querySelectorAll(".pair-item")];
+    const allNames = items.flatMap(el => 
+        el.textContent.split(/[↔&]/) // Splittar nu enbart på ↔ och &
+        .map(n => n.replace(/\(.*\)/, "").trim())
+        .filter(n => n !== "")
+    );
+    
+    const reshuffled = allNames.sort(() => Math.random() - 0.5);
+    const isDouble = items[0].textContent.includes("&");
+    const newMatches = generateMatchStrings(reshuffled, isDouble ? 4 : 2);
+    
+    const container = groupDiv.querySelector(".list-container");
+    container.innerHTML = "";
+    newMatches.forEach(m => {
+        const div = document.createElement("div");
+        div.classList.add("pair-item");
+        div.textContent = m;
+        container.appendChild(div);
+    });
+    saveState();
+}
+
+// --- REDIGERINGSLOGIK ---
 function toggleEditMode(groupDiv) {
     let editSection = groupDiv.querySelector(".edit-section");
     if (editSection) {
-    editSection.remove();
-    saveState();
-    return;
+        editSection.remove();
+        saveState();
+        return;
     }
 
     editSection = document.createElement("div");
     editSection.classList.add("edit-section");
 
-    const items = [...groupDiv.querySelectorAll(".pair-item")].map(el => el.textContent);
-    const existingNames = items.flatMap(p => {
-    const parts = p.split("↔").map(s => s.replace("(ingen partner)", "").trim());
-    return parts.filter(n => n);
-    });
+    const items = [...groupDiv.querySelectorAll(".pair-item")];
+    const namesInGroup = items.flatMap(el => 
+        el.textContent.split(/[↔&]/)
+        .map(n => n.replace(/\(.*\)/, "").trim())
+        .filter(n => n !== "")
+    );
 
     const editList = document.createElement("div");
-    existingNames.forEach(name => {
-    const item = document.createElement("div");
-    item.classList.add("edit-item");
-    item.textContent = name;
-    const delBtn = document.createElement("button");
-    delBtn.textContent = "❌";
-    delBtn.addEventListener("click", () => item.remove());
-    item.appendChild(delBtn);
-    editList.appendChild(item);
+    namesInGroup.forEach(name => {
+        const item = document.createElement("div");
+        item.classList.add("edit-item");
+        item.textContent = name;
+        const delBtn = document.createElement("button");
+        delBtn.textContent = "❌";
+        delBtn.addEventListener("click", () => item.remove());
+        item.appendChild(delBtn);
+        editList.appendChild(item);
     });
 
     const input = document.createElement("input");
-    input.placeholder = "Lägg till namn...";
+    input.placeholder = "Nytt namn...";
+
     const addBtn = document.createElement("button");
-    addBtn.textContent = "Lägg till";
-    addBtn.addEventListener("click", () => {
-    const newName = input.value.trim();
-    if (newName) {
-        const newItem = document.createElement("div");
-        newItem.classList.add("edit-item");
-        newItem.textContent = newName;
-        const delBtn = document.createElement("button");
-        delBtn.textContent = "❌";
-        delBtn.addEventListener("click", () => newItem.remove());
-        newItem.appendChild(delBtn);
-        editList.appendChild(newItem);
-        input.value = "";
-    }
-    });
+    addBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5V19M5 12H19"/>
+        </svg>`;
+    addBtn.title = "Lägg till";
+    addBtn.classList.add("icon-btn");
+    
+    addBtn.onclick = () => {
+        if (input.value.trim()) {
+            const item = document.createElement("div");
+            item.classList.add("edit-item");
+            item.textContent = input.value.trim();
+            const delBtn = document.createElement("button");
+            delBtn.textContent = "❌";
+            delBtn.onclick = () => item.remove();
+            item.appendChild(delBtn);
+            editList.appendChild(item);
+            input.value = "";
+        }
+    };
 
     const saveBtn = document.createElement("button");
-    saveBtn.textContent = "Spara";
-    saveBtn.addEventListener("click", () => {
-    const updatedNames = [...editList.querySelectorAll(".edit-item")]
-        .map(el => el.childNodes[0].textContent);
+    saveBtn.title = "Spara";
+    saveBtn.innerHTML = `
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+    `;
+    saveBtn.onclick = () => {
+        const updatedNames = [...editList.querySelectorAll(".edit-item")].map(el => el.childNodes[0].textContent);
+        const isDouble = items.length > 0 && items[0].textContent.includes("&");
+        const newMatches = generateMatchStrings(updatedNames, isDouble ? 4 : 2);
+        
+        const container = groupDiv.querySelector(".list-container");
+        container.innerHTML = "";
+        newMatches.forEach(m => {
+            const div = document.createElement("div");
+            div.classList.add("pair-item");
+            div.textContent = m;
+            container.appendChild(div);
+        });
+        editSection.remove();
+        saveState();
+    };
 
-    // Behåll gamla parnamn som finns kvar
-    const oldPairs = [...groupDiv.querySelectorAll(".pair-item")].map(p => p.textContent);
-    const usedNames = oldPairs.flatMap(p => p.split("↔").map(s => s.replace("(ingen partner)", "").trim()));
-    const newNames = updatedNames.filter(n => !usedNames.includes(n));
-
-    // Skapa nya par av de nya namnen
-    const shuffled = [...newNames].sort(() => Math.random() - 0.5);
-    const newPairs = [];
-    for (let i = 0; i < shuffled.length; i += 2) {
-        if (i + 1 < shuffled.length) {
-        newPairs.push(`${shuffled[i]} ↔ ${shuffled[i + 1]}`);
-        } else {
-        newPairs.push(`${shuffled[i]} (ingen partner)`);
-        }
-    }
-
-    // Kombinera gamla par som fortfarande gäller + nya par
-    const remainingPairs = [];
-    for (const p of oldPairs) {
-        const [a, b] = p.split("↔").map(s => s.replace("(ingen partner)", "").trim());
-        if (updatedNames.includes(a) && (!b || updatedNames.includes(b))) {
-        remainingPairs.push(p);
-        }
-    }
-
-    const combinedPairs = [...remainingPairs, ...newPairs];
-
-    const newList = document.createElement("div");
-    combinedPairs.forEach(p => {
-        const div = document.createElement("div");
-        div.classList.add("pair-item");
-        div.textContent = p;
-        newList.appendChild(div);
-    });
-
-    groupDiv.querySelectorAll(".pair-item").forEach(el => el.remove());
-    groupDiv.insertBefore(newList, editSection);
-    editSection.remove();
-    saveState();
-    });
-
-    editSection.appendChild(editList);
-    editSection.appendChild(input);
-    editSection.appendChild(addBtn);
-    editSection.appendChild(saveBtn);
+    editSection.append(editList, input, addBtn, saveBtn);
     groupDiv.appendChild(editSection);
 }
 
+// --- Persistence ---
 function saveState() {
     localStorage.setItem("pairsList", pairsList.innerHTML);
     localStorage.setItem("groupCount", groupCount);
 }
 
 clearBtn.addEventListener("click", () => {
-    if (confirm("Är du säker på att du vill rensa alla grupper?")) {
-    localStorage.removeItem("pairsList");
-    localStorage.removeItem("groupCount");
-    pairsList.innerHTML = "";
-    groupCount = 0;
+    if (confirm("Rensa allt?")) {
+        pairsList.innerHTML = "";
+        groupCount = 0;
+        localStorage.clear();
     }
 });
 
 window.addEventListener("load", () => {
     const savedPairs = localStorage.getItem("pairsList");
-    const savedCount = localStorage.getItem("groupCount");
     if (savedPairs) {
-    pairsList.innerHTML = savedPairs;
-    groupCount = parseInt(savedCount) || 0;
-    pairsList.querySelectorAll(".editBtn").forEach(btn => {
-        const groupDiv = btn.closest(".group");
-        btn.addEventListener("click", () => toggleEditMode(groupDiv));
-    });
+        pairsList.innerHTML = savedPairs;
+        groupCount = parseInt(localStorage.getItem("groupCount")) || 0;
+        
+        pairsList.querySelectorAll(".group").forEach(groupDiv => {
+            const eb = groupDiv.querySelector(".editBtn");
+            const sb = groupDiv.querySelector(".shuffleBtn");
+            if(eb) eb.onclick = () => toggleEditMode(groupDiv);
+            if(sb) sb.onclick = () => shuffleExistingGroup(groupDiv);
+        });
     }
 });
-
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-}
